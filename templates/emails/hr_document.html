@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Important HR Document - Action Required</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .header {
+            border-bottom: 3px solid #d32f2f;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .urgent {
+            background-color: #ffebee;
+            border-left: 4px solid #d32f2f;
+            padding: 15px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .document-info {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            background-color: #d32f2f;
+            color: white;
+            padding: 14px 35px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 11px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2 style="color: #d32f2f; margin: 0;">Human Resources Department</h2>
+            <p style="margin: 5px 0 0 0; color: #666;">Employee Document Portal</p>
+        </div>
+        
+        <p>Dear {{.FirstName}} {{.LastName}},</p>
+        
+        <div class="urgent">
+            URGENT: Action required by October 16, 2025
+        </div>
+        
+        <p>You have a <strong>time-sensitive HR document</strong> that requires your immediate review and signature. This document must be acknowledged within <strong>48 hours</strong> to avoid delays in processing your employment records.</p>
+        
+        <div class="document-info">
+            <strong>Document Details:</strong><br>
+            Document Type: Employee Policy Update 2025<br>
+            Employee: {{.FirstName}} {{.LastName}}<br>
+            Employee ID: {{.Position}}<br>
+            Date Issued: October 13, 2025<br>
+            Deadline: October 16, 2025 5:00 PM<br>
+            Status: <span style="color: #d32f2f;">PENDING REVIEW</span>
+        </div>
+        
+        <p>This document contains important updates to:</p>
+        <ul>
+            <li>Annual leave entitlements</li>
+            <li>Remote work policy changes</li>
+            <li>Superannuation contribution rates</li>
+            <li>Code of conduct amendments</li>
+        </ul>
+        
+        <p style="text-align: center;">
+            <a href="{{.URL}}" class="button">View & Sign Document</a>
+        </p>
+        
+        <p><strong>Note:</strong> You will be prompted to login with your company credentials to access the secure document portal. The document must be reviewed and digitally signed before the deadline.</p>
+        
+        <p><strong>Failure to acknowledge this document by the deadline may result in:</strong></p>
+        <ul>
+            <li>Delayed payroll processing</li>
+            <li>Temporary suspension of system access</li>
+            <li>Compliance issues with your employment record</li>
+        </ul>
+        
+        <p>If you have any questions or believe you received this email in error, please contact HR directly at hr@company.com or call (02) 9xxx-xxxx.</p>
+        
+        <p>Kind regards,<br>
+        <strong>Sarah Mitchell</strong><br>
+        HR Manager<br>
+        Human Resources Department<br>
+        Phone: (02) 9xxx-xxxx | Email: hr@company.com</p>
+        
+        <div class="footer">
+            <p><strong>CONFIDENTIALITY NOTICE:</strong> This email and any attachments are confidential and intended solely for the addressee. If you have received this email in error, please delete it immediately and notify the sender.</p>
+            <p>&copy; 2025 Company Name Human Resources. All rights reserved.</p>
+        </div>
+    </div>
+    
+    {{.Tracker}}
+</body>
+</html>

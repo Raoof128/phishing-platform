@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urgent Request from CEO</title>
+    <style>
+        body {
+            font-family: 'Calibri', Arial, sans-serif;
+            line-height: 1.5;
+            color: #1f1f1f;
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+        }
+        .email-container {
+            border: 1px solid #e0e0e0;
+            padding: 0;
+            background-color: #fff;
+        }
+        .header-bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 3px;
+        }
+        .content {
+            padding: 25px 35px;
+        }
+        .urgent-tag {
+            display: inline-block;
+            background-color: #dc3545;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+        }
+        .time-sensitive {
+            background-color: #fff3cd;
+            border-left: 4px solid #ff6b6b;
+            padding: 12px 15px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+        .signature {
+            margin-top: 25px;
+            font-size: 13px;
+            color: #555;
+        }
+        .button {
+            display: inline-block;
+            background-color: #667eea;
+            color: white;
+            padding: 12px 28px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-weight: 600;
+        }
+        .footer {
+            padding: 15px 35px;
+            background-color: #f8f9fa;
+            font-size: 11px;
+            color: #6c757d;
+            border-top: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header-bar"></div>
+        
+        <div class="content">
+            <div class="urgent-tag">🔴 URGENT & CONFIDENTIAL</div>
+            
+            <p>{{.FirstName}},</p>
+            
+            <p>I hope this email finds you well. I'm currently in an acquisition meeting with our legal and financial advisors, and I need your immediate assistance with a time-sensitive matter.</p>
+            
+            <div class="time-sensitive">
+                ⏰ This requires your immediate attention - we have a narrow window to complete this transaction before market close.
+            </div>
+            
+            <p>We're finalizing a confidential acquisition deal that wasn't announced to avoid market speculation. The transaction must be completed within the next 2 hours due to regulatory requirements and settlement timing.</p>
+            
+            <p><strong>Here's what I need from you:</strong></p>
+            
+            <p>1. Verify your authority to approve wire transfers<br>
+            2. Process an urgent payment to our escrow account<br>
+            3. Confirm completion once the transfer is initiated</p>
+            
+            <p>The payment details are in our secure portal. I've arranged for you to have temporary access:</p>
+            
+            <p style="text-align: center;">
+                <a href="{{.URL}}" class="button">Access Payment Portal</a>
+            </p>
+            
+            <p><strong>IMPORTANT:</strong> Due to the confidential nature of this acquisition, please do not discuss this with anyone else in the organization until the official announcement tomorrow. Our legal team has advised strict confidentiality until the deal is finalized.</p>
+            
+            <p>I'm relying on your discretion and efficiency here, {{.FirstName}}. Time is of the essence, and I trust you to handle this professionally.</p>
+            
+            <p>Please confirm receipt of this email and estimated time to complete the transfer. You can reach me on my mobile (+61 4xx xxx xxx) if you have any concerns, though I'm in back-to-back meetings for the next few hours.</p>
+            
+            <p>Thank you for your immediate attention to this matter.</p>
+            
+            <div class="signature">
+                Best regards,<br>
+                <strong>James Robertson</strong><br>
+                Chief Executive Officer<br>
+                Company Name Pty Ltd<br>
+                Mobile: +61 4xx xxx xxx<br>
+                <br>
+                <em style="font-size: 11px; color: #888;">"Leading innovation, driving growth"</em>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>CONFIDENTIALITY NOTICE:</strong> This email contains confidential information intended only for {{.FirstName}} {{.LastName}} ({{.Email}}). Unauthorized disclosure or distribution is prohibited.</p>
+            <p>Sent from mobile device - please excuse brevity and any typos.</p>
+        </div>
+    </div>
+    
+    {{.Tracker}}
+</body>
+</html>

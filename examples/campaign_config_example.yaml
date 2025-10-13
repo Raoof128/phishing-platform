@@ -1,0 +1,82 @@
+# Example Campaign Configuration
+# This file demonstrates how to configure progressive difficulty campaigns
+
+progressive_campaigns:
+  # Basic Level - Obvious phishing attempt
+  - name: "Q4 Security Test - Basic"
+    template: "Password Reset"
+    landing_page: "Office365 Login"
+    smtp_profile: "Production SMTP"
+    description: "Easy to detect password expiration notice"
+    expected_click_rate: "30-40%"
+
+  # Intermediate Level - More realistic
+  - name: "Q4 Security Test - Intermediate"
+    template: "HR Document"
+    landing_page: "Corporate Portal"
+    smtp_profile: "Production SMTP"
+    description: "Moderately convincing HR policy update"
+    expected_click_rate: "20-30%"
+
+  # Advanced Level - Sophisticated attack
+  - name: "Q4 Security Test - Advanced"
+    template: "CEO Fraud"
+    landing_page: "Corporate Portal"
+    smtp_profile: "Production SMTP"
+    description: "Highly targeted CEO impersonation"
+    expected_click_rate: "10-20%"
+
+# Campaign Schedule
+schedule:
+  start_date: "2025-10-20"
+  interval_days: 14  # 2 weeks between campaigns
+  launch_time: "09:00"  # 9 AM local time
+
+# Target Groups
+target_groups:
+  - "Marketing Team"
+  - "Sales Team"
+  - "Engineering Team"
+  - "Finance Team"
+  - "Executive Team"
+
+# Training Assignment Rules
+training_rules:
+  # Automatically assign training to users who fail
+  auto_assign: true
+
+  # Minimum risk score to trigger training (0-100)
+  min_risk_score: 30
+
+  # Training modules by risk level
+  risk_based_training:
+    high_risk: "advanced_phishing_recognition"      # Score 70-100
+    medium_risk: "intermediate_security_awareness"  # Score 40-69
+    low_risk: "basic_email_safety"                 # Score 1-39
+
+  # Send training reminder after X days
+  reminder_days: 3
+
+# Reporting
+reporting:
+  # Email addresses to receive campaign summaries
+  report_recipients:
+    - security@company.com
+    - manager@company.com
+
+  # Report frequency
+  frequency: "after_each_campaign"  # or "weekly", "monthly"
+
+  # Report format
+  format: "html"  # or "pdf", "csv"
+
+# Notes
+notes: |
+  This is an example configuration for a progressive phishing campaign.
+
+  Best Practices:
+  - Start with easy-to-detect attacks to establish baseline
+  - Allow 2 weeks between campaigns for training completion
+  - Gradually increase sophistication
+  - Track improvement over time
+  - Focus on education, not punishment

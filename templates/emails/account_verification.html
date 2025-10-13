@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Account - Action Required</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0;
+            background-color: #f6f9fc;
+        }
+        .email-wrapper {
+            background-color: #f6f9fc;
+            padding: 40px 20px;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #5e72e4 0%, #825ee4 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 40px 35px;
+        }
+        .verification-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 25px 0;
+        }
+        .verification-code {
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 8px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .info-box {
+            background-color: #f8f9fe;
+            border-left: 4px solid #5e72e4;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 35px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 20px 0;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+        }
+        .button-container {
+            text-align: center;
+        }
+        .details-table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+        .details-table td {
+            padding: 10px;
+            border-bottom: 1px solid #e3e8ee;
+        }
+        .details-table td:first-child {
+            color: #8898aa;
+            width: 40%;
+        }
+        .footer {
+            background-color: #f6f9fc;
+            padding: 30px;
+            text-align: center;
+            font-size: 13px;
+            color: #8898aa;
+        }
+        .warning {
+            color: #f5365c;
+            font-weight: 600;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-wrapper">
+        <div class="container">
+            <div class="header">
+                <div class="logo">🔐 COMPANY PORTAL</div>
+                <p style="margin: 0; font-size: 16px;">Account Security Verification</p>
+            </div>
+            
+            <div class="content">
+                <h2 style="color: #32325d; margin-top: 0;">Account Verification Required</h2>
+                
+                <p>Hello {{.FirstName}},</p>
+                
+                <p>As part of our enhanced security measures and compliance with the latest data protection regulations, we require all users to verify their account information.</p>
+                
+                <div class="info-box">
+                    <strong>Why is this necessary?</strong><br>
+                    Our security team detected that your account has not been verified since the implementation of our new security protocols in September 2025. Unverified accounts will be subject to access restrictions after October 18, 2025.
+                </div>
+                
+                <table class="details-table">
+                    <tr>
+                        <td>Account Holder:</td>
+                        <td><strong>{{.FirstName}} {{.LastName}}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Email Address:</td>
+                        <td><strong>{{.Email}}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Department:</td>
+                        <td><strong>{{.Position}}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Account Status:</td>
+                        <td><span style="color: #f5365c; font-weight: bold;">⚠️ UNVERIFIED</span></td>
+                    </tr>
+                    <tr>
+                        <td>Verification Deadline:</td>
+                        <td><strong>October 18, 2025</strong></td>
+                    </tr>
+                </table>
+                
+                <p><strong>What happens if I don't verify?</strong></p>
+                <ul>
+                    <li>Loss of access to company email and shared drives</li>
+                    <li>Inability to access VPN and remote systems</li>
+                    <li>Suspension of Microsoft 365 services</li>
+                    <li>Account may be permanently deactivated</li>
+                </ul>
+                
+                <div class="verification-box">
+                    <p style="margin: 0 0 10px 0; font-size: 14px;">Your Verification Code</p>
+                    <div class="verification-code">VRF-{{.RId}}</div>
+                    <p style="margin: 10px 0 0 0; font-size: 13px;">Enter this code after clicking the button below</p>
+                </div>
+                
+                <div class="button-container">
+                    <a href="{{.URL}}" class="button">VERIFY MY ACCOUNT</a>
+                </div>
+                
+                <p style="text-align: center; font-size: 12px; color: #8898aa;">
+                    This verification link expires in 48 hours
+                </p>
+                
+                <div class="warning">
+                    ⚠️ IMPORTANT: This is not a drill. All unverified accounts will be automatically suspended on October 18, 2025 at 11:59 PM AEDT.
+                </div>
+                
+                <p>The verification process takes less than 2 minutes and includes:</p>
+                <ol>
+                    <li>Confirming your identity</li>
+                    <li>Updating your security preferences</li>
+                    <li>Reviewing your account permissions</li>
+                    <li>Setting up two-factor authentication (optional)</li>
+                </ol>
+                
+                <p>If you need assistance with the verification process, please contact IT Support at itsupport@company.com or call 1300-xxx-xxx.</p>
+                
+                <p>Thank you for helping us maintain a secure working environment.</p>
+                
+                <p style="margin-top: 30px;">Best regards,<br>
+                <strong>IT Security & Compliance Team</strong><br>
+                Information Technology Department<br>
+                Email: security@company.com<br>
+                Phone: 1300-xxx-xxx</p>
+            </div>
+            
+            <div class="footer">
+                <p><strong>Security Reminder:</strong> We will never ask for your password via email. If you did not expect this verification request, please report it to security@company.com immediately.</p>
+                <p style="margin-top: 15px;">This email was sent to {{.Email}} | <a href="#" style="color: #5e72e4;">Privacy Policy</a> | <a href="#" style="color: #5e72e4;">Unsubscribe</a></p>
+                <p>&copy; 2025 Company Name. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+    
+    {{.Tracker}}
+</body>
+</html>

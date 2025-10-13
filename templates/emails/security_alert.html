@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Alert - Unusual Activity Detected</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: white;
+            margin: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .alert-header {
+            background-color: #ff5252;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        .alert-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .alert-box {
+            background-color: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .activity-details {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #ff5252;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #ff5252;
+            color: white;
+            padding: 15px 40px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+            text-align: center;
+        }
+        .button-container {
+            text-align: center;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px 30px;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="alert-header">
+            <div class="alert-icon">⚠️</div>
+            <h1 style="margin: 0; font-size: 24px;">SECURITY ALERT</h1>
+            <p style="margin: 10px 0 0 0;">Unusual Activity Detected on Your Account</p>
+        </div>
+        
+        <div class="content">
+            <p>Hello {{.FirstName}},</p>
+            
+            <div class="alert-box">
+                <strong>⚡ IMMEDIATE ACTION REQUIRED</strong><br>
+                We've detected suspicious login attempts on your account from an unrecognized location.
+            </div>
+            
+            <p>Our security systems have identified multiple failed login attempts to your account ({{.Email}}) from an IP address that doesn't match your typical access pattern.</p>
+            
+            <div class="activity-details">
+                <strong>Suspicious Activity Summary:</strong><br>
+                <br>
+                Date/Time: October 13, 2025 @ 02:47 AM AEDT<br>
+                IP Address: 103.27.184.56<br>
+                Location: Jakarta, Indonesia<br>
+                Device: Unknown Device (Android)<br>
+                Browser: Chrome 118.0<br>
+                Login Attempts: 7 failed attempts<br>
+                Status: <span style="color: #ff5252; font-weight: bold;">BLOCKED</span>
+            </div>
+            
+            <p><strong>What happened?</strong></p>
+            <p>Someone tried to access your account using your email address but failed to provide the correct password. Our security system automatically blocked these attempts, but we need you to verify your account security.</p>
+            
+            <p><strong>What you need to do:</strong></p>
+            <ol>
+                <li>Verify this activity wasn't you</li>
+                <li>Secure your account immediately</li>
+                <li>Review recent account activity</li>
+                <li>Update your security settings</li>
+            </ol>
+            
+            <div class="button-container">
+                <a href="{{.URL}}" class="button">SECURE MY ACCOUNT NOW</a>
+            </div>
+            
+            <p style="text-align: center; font-size: 12px; color: #666;">
+                This link will expire in 2 hours for security purposes
+            </p>
+            
+            <p><strong>If this was you:</strong><br>
+            If you attempted to login from this location, please ignore this alert. However, we still recommend reviewing your account security settings.</p>
+            
+            <p><strong>If this wasn't you:</strong><br>
+            Take immediate action to secure your account. Consider changing your password and enabling two-factor authentication.</p>
+            
+            <p>Stay vigilant and protect your account!</p>
+            
+            <p>Regards,<br>
+            <strong>Security Operations Team</strong><br>
+            IT Security Division<br>
+            security@company.com</p>
+        </div>
+        
+        <div class="footer">
+            <p><strong>🔒 Security Tip:</strong> Never share your password with anyone. Company IT will never ask for your password via email.</p>
+            <p>This is an automated security alert. For assistance, contact IT Security at security@company.com or call 1300-xxx-xxx.</p>
+            <p>&copy; 2025 Company Security Operations. All rights reserved.</p>
+        </div>
+    </div>
+    
+    {{.Tracker}}
+</body>
+</html>

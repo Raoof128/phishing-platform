@@ -1,0 +1,101 @@
+.
+├── automation
+│   ├── analytics.py
+│   ├── campaign_manager.py
+│   ├── config
+│   │   ├── api_config.yaml
+│   │   └── smtp_config.yaml
+│   ├── __init__.py
+│   ├── training_automation.py
+│   └── user_import.py
+├── config
+│   ├── api_config.yaml
+│   └── smtp_config.yaml
+├── dashboard
+│   ├── api
+│   │   └── __init__.py
+│   ├── app.py
+│   ├── __init__.py
+│   ├── static
+│   │   ├── charts
+│   │   ├── css
+│   │   └── js
+│   └── templates
+│       └── index.html
+├── docs
+│   ├── api_documentation.md
+│   ├── installation_guide.md
+│   ├── installation.md
+│   ├── screenshots
+│   └── user_manual.md
+├── examples
+│   ├── campaign_config_example.yaml
+│   └── users_example.csv
+├── GETTING_STARTED.md
+├── gophish
+│   ├── config.json
+│   ├── db
+│   │   ├── db_mysql
+│   │   └── db_sqlite3
+│   ├── gophish
+│   ├── LICENSE
+│   ├── README.md
+│   ├── static
+│   │   ├── css
+│   │   ├── db
+│   │   ├── font
+│   │   ├── images
+│   │   └── js
+│   ├── templates
+│   │   ├── base.html
+│   │   ├── campaign_results.html
+│   │   ├── campaigns.html
+│   │   ├── dashboard.html
+│   │   ├── flashes.html
+│   │   ├── groups.html
+│   │   ├── landing_pages.html
+│   │   ├── login.html
+│   │   ├── nav.html
+│   │   ├── reset_password.html
+│   │   ├── sending_profiles.html
+│   │   ├── settings.html
+│   │   ├── templates.html
+│   │   ├── users.html
+│   │   └── webhooks.html
+│   └── VERSION
+├── project_structure.txt
+├── PROJECT_SUMMARY.md
+├── README.md
+├── requirements.txt
+├── run_dashboard.sh
+├── run_gophish.sh
+├── setup.sh
+├── templates
+│   ├── assets
+│   │   ├── css
+│   │   ├── images
+│   │   └── js
+│   ├── emails
+│   │   ├── account_verification.html
+│   │   ├── ceo_fraud.html
+│   │   ├── hr_document.html
+│   │   ├── password_reset.html
+│   │   └── security_alert.html
+│   └── landing_pages
+│       ├── assets
+│       ├── awareness_page.html
+│       ├── corporate_portal.html
+│       ├── gmail_login.html
+│       ├── office365_login.html
+│       └── training_redirect.html
+├── test_platform.py
+├── tests
+├── training
+│   └── modules
+│       ├── module1_phishing_recognition.md
+│       ├── module2_social_engineering.md
+│       └── module3_email_safety.md
+├── TROUBLESHOOTING.md
+└── verify_installation.py
+
+36 directories, 63 files

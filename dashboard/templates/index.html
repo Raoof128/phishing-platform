@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phishing Platform - Analytics Dashboard</title>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --border: #e2e8f0;
+
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --dark: #f1f5f9;
+            --light: #0f172a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 260px;
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .logo i {
+            font-size: 28px;
+        }
+
+        .sidebar.collapsed .logo-text {
+            display: none;
+        }
+
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .sidebar-toggle:hover {
+            background: var(--bg-secondary);
+            color: var(--primary);
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex: 1;
+        }
+
+        .nav-item {
+            margin-bottom: 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--bg-secondary);
+            color: var(--primary);
+        }
+
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar.collapsed .nav-text {
+            display: none;
+        }
+
+        .sidebar-footer {
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            padding: 30px;
+            transition: margin-left 0.3s;
+            min-height: 100vh;
+        }
+
+        .sidebar.collapsed + .main-content {
+            margin-left: 80px;
+        }
+
+        /* Header */
+        .top-bar {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .page-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .page-title h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .page-title .subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .top-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-icon {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            width: 42px;
+            height: 42px;
+            padding: 0;
+            justify-content: center;
+        }
+
+        .btn-icon:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .stat-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+
+        .stat-change.positive {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .stat-change.negative {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+        }
+
+        /* Table */
+        .table-card {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .table-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-secondary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .search-box input {
+            border: none;
+            background: none;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 14px;
+            width: 200px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--bg-secondary);
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody tr {
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .badge-info {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+
+        .badge-gray {
+            background: rgba(100, 116, 139, 0.1);
+            color: var(--gray);
+        }
+
+        /* Loading & Error States */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Live Update Indicator */
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-bar {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-box input {
+                width: 150px;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gray);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-fish"></i>
+                <span class="logo-text">PhishGuard</span>
+            </div>
+            <button class="sidebar-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" data-section="dashboard">
+                        <i class="fas fa-chart-line"></i>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="campaigns">
+                        <i class="fas fa-envelope"></i>
+                        <span class="nav-text">Campaigns</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="users">
+                        <i class="fas fa-users"></i>
+                        <span class="nav-text">Users</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="analytics">
+                        <i class="fas fa-chart-pie"></i>
+                        <span class="nav-text">Analytics</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="training">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span class="nav-text">Training</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="nav-link">
+                <i class="fas fa-cog"></i>
+                <span class="nav-text">Settings</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="page-title">
+                <div>
+                    <h1>Security Awareness Dashboard</h1>
+                    <p class="subtitle">Real-time monitoring and analytics</p>
+                </div>
+            </div>
+            <div class="top-actions">
+                <div class="live-indicator">
+                    <span class="live-dot"></span>
+                    <span>Live</span>
+                </div>
+                <button class="btn btn-icon" onclick="loadDashboard()" title="Refresh">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="error-container"></div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                </div>
+                <div class="stat-value" id="total-campaigns">-</div>
+                <div class="stat-label">Total Campaigns</div>
+                <span class="stat-change positive" style="display: none;" id="campaigns-change">
+                    <i class="fas fa-arrow-up"></i> +2.5%
+                </span>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="fas fa-running"></i>
+                    </div>
+                </div>
+                <div class="stat-value" id="active-campaigns">-</div>
+                <div class="stat-label">Active Campaigns</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <div class="stat-value" id="total-users">-</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                </div>
+                <div class="stat-value" id="high-risk-users">-</div>
+                <div class="stat-label">High Risk Users</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="fas fa-mouse-pointer"></i>
+                    </div>
+                </div>
+                <div class="stat-value" id="click-rate">-%</div>
+                <div class="stat-label">Overall Click Rate</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="fas fa-paper-plane"></i>
+                    </div>
+                </div>
+                <div class="stat-value" id="submit-rate">-%</div>
+                <div class="stat-label">Overall Submit Rate</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Risk Distribution</h3>
+                </div>
+                <canvas id="riskChart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Campaign Performance Trends</h3>
+                </div>
+                <canvas id="trendsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Campaigns Table -->
+        <div class="table-card">
+            <div class="table-header">
+                <h3 class="table-title">Recent Campaigns</h3>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search campaigns..." id="campaign-search">
+                </div>
+            </div>
+            <div id="campaigns-loading" class="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 16px;">Loading campaigns...</p>
+            </div>
+            <div id="campaigns-table-container" style="display: none;">
+                <table id="campaigns-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Campaign Name</th>
+                            <th>Status</th>
+                            <th>Launch Date</th>
+                            <th>Completed</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="campaigns-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- High Risk Users Table -->
+        <div class="table-card">
+            <div class="table-header">
+                <h3 class="table-title">High Risk Users (Top 10)</h3>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search users..." id="user-search">
+                </div>
+            </div>
+            <div id="users-loading" class="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 16px;">Loading user data...</p>
+            </div>
+            <div id="users-table-container" style="display: none;">
+                <table id="users-table">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Risk Score</th>
+                            <th>Risk Level</th>
+                            <th>Campaigns</th>
+                            <th>Clicks</th>
+                            <th>Submitted</th>
+                            <th>Reported</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let riskChart = null;
+        let trendsChart = null;
+        let currentTheme = 'light';
+
+        // Initialize
+        window.addEventListener('load', () => {
+            loadDashboard();
+            initializeSearch();
+            loadTheme();
+        });
+
+        // Theme Toggle
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            localStorage.setItem('theme', currentTheme);
+
+            const icon = document.querySelector('.theme-toggle i');
+            icon.className = currentTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+
+            // Refresh charts with new theme
+            if (riskChart) loadRiskDistribution();
+            if (trendsChart) loadCampaignTrends();
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            currentTheme = savedTheme;
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            const icon = document.querySelector('.theme-toggle i');
+            icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // Sidebar Toggle
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        }
+
+        // Navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+
+                // Here you would typically load different content based on section
+                const section = link.dataset.section;
+                console.log('Navigate to:', section);
+            });
+        });
+
+        // Load Dashboard Data
+        async function loadDashboard() {
+            showLoadingIndicator();
+            await Promise.all([
+                loadSummary(),
+                loadCampaigns(),
+                loadUserRisks(),
+                loadRiskDistribution(),
+                loadCampaignTrends()
+            ]);
+            hideLoadingIndicator();
+        }
+
+        function showLoadingIndicator() {
+            // Add a subtle loading animation
+        }
+
+        function hideLoadingIndicator() {
+            // Remove loading animation
+        }
+
+        async function loadSummary() {
+            try {
+                const response = await fetch('/api/dashboard_summary');
+                const data = await response.json();
+
+                document.getElementById('total-campaigns').textContent = data.total_campaigns || 0;
+                document.getElementById('active-campaigns').textContent = data.active_campaigns || 0;
+                document.getElementById('total-users').textContent = data.total_users || 0;
+                document.getElementById('high-risk-users').textContent = data.high_risk_users || 0;
+                document.getElementById('click-rate').textContent = (data.overall_click_rate || 0).toFixed(1) + '%';
+                document.getElementById('submit-rate').textContent = (data.overall_submit_rate || 0).toFixed(1) + '%';
+            } catch (error) {
+                showError('Failed to load dashboard summary');
+            }
+        }
+
+        async function loadCampaigns() {
+            try {
+                const response = await fetch('/api/campaigns');
+                const campaigns = await response.json();
+
+                const tbody = document.getElementById('campaigns-tbody');
+                tbody.innerHTML = '';
+
+                campaigns.slice(0, 10).forEach(campaign => {
+                    const row = document.createElement('tr');
+
+                    let statusBadge = '';
+                    if (campaign.status === 'Completed') {
+                        statusBadge = '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Completed</span>';
+                    } else if (campaign.status === 'In progress') {
+                        statusBadge = '<span class="badge badge-info"><i class="fas fa-spinner fa-spin"></i> In Progress</span>';
+                    } else {
+                        statusBadge = '<span class="badge badge-gray"><i class="fas fa-clock"></i> Scheduled</span>';
+                    }
+
+                    const launchDate = campaign.launch_date ?
+                        new Date(campaign.launch_date).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                        }) : '-';
+
+                    const completedDate = campaign.completed_date ?
+                        new Date(campaign.completed_date).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                        }) : '-';
+
+                    row.innerHTML = `
+                        <td><strong>#${campaign.id}</strong></td>
+                        <td>${campaign.name}</td>
+                        <td>${statusBadge}</td>
+                        <td>${launchDate}</td>
+                        <td>${completedDate}</td>
+                        <td>
+                            <button class="btn btn-icon" style="width: 32px; height: 32px; font-size: 12px;" onclick="viewCampaign(${campaign.id})" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    `;
+
+                    tbody.appendChild(row);
+                });
+
+                document.getElementById('campaigns-loading').style.display = 'none';
+                document.getElementById('campaigns-table-container').style.display = 'block';
+            } catch (error) {
+                document.getElementById('campaigns-loading').innerHTML =
+                    '<div class="error-message"><i class="fas fa-exclamation-circle"></i> Failed to load campaigns</div>';
+            }
+        }
+
+        async function loadUserRisks() {
+            try {
+                const response = await fetch('/api/user_risks');
+                const users = await response.json();
+
+                const tbody = document.getElementById('users-tbody');
+                tbody.innerHTML = '';
+
+                users.slice(0, 10).forEach(user => {
+                    const row = document.createElement('tr');
+
+                    let riskBadge = '';
+                    if (user.risk_level === 'HIGH') {
+                        riskBadge = '<span class="badge badge-danger"><i class="fas fa-exclamation-circle"></i> High</span>';
+                    } else if (user.risk_level === 'MEDIUM') {
+                        riskBadge = '<span class="badge badge-warning"><i class="fas fa-exclamation-triangle"></i> Medium</span>';
+                    } else if (user.risk_level === 'LOW') {
+                        riskBadge = '<span class="badge badge-info"><i class="fas fa-info-circle"></i> Low</span>';
+                    } else {
+                        riskBadge = '<span class="badge badge-gray"><i class="fas fa-check-circle"></i> Minimal</span>';
+                    }
+
+                    row.innerHTML = `
+                        <td><strong>${user.email}</strong></td>
+                        <td><strong>${user.risk_score}</strong>/100</td>
+                        <td>${riskBadge}</td>
+                        <td>${user.campaigns_participated || 0}</td>
+                        <td>${user.links_clicked || 0}</td>
+                        <td>${user.data_submitted || 0}</td>
+                        <td>${user.emails_reported || 0}</td>
+                    `;
+
+                    tbody.appendChild(row);
+                });
+
+                document.getElementById('users-loading').style.display = 'none';
+                document.getElementById('users-table-container').style.display = 'block';
+            } catch (error) {
+                document.getElementById('users-loading').innerHTML =
+                    '<div class="error-message"><i class="fas fa-exclamation-circle"></i> Failed to load user data</div>';
+            }
+        }
+
+        async function loadRiskDistribution() {
+            try {
+                const response = await fetch('/api/risk_distribution');
+                const distribution = await response.json();
+
+                const ctx = document.getElementById('riskChart').getContext('2d');
+
+                if (riskChart) {
+                    riskChart.destroy();
+                }
+
+                const isDark = currentTheme === 'dark';
+                const textColor = isDark ? '#f1f5f9' : '#1e293b';
+                const gridColor = isDark ? '#334155' : '#e2e8f0';
+
+                riskChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['High Risk', 'Medium Risk', 'Low Risk', 'Minimal Risk'],
+                        datasets: [{
+                            data: [
+                                distribution.HIGH || 0,
+                                distribution.MEDIUM || 0,
+                                distribution.LOW || 0,
+                                distribution.NONE || 0
+                            ],
+                            backgroundColor: [
+                                '#ef4444',
+                                '#f59e0b',
+                                '#3b82f6',
+                                '#9ca3af'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: textColor,
+                                    padding: 15,
+                                    font: {
+                                        size: 12,
+                                        family: "'Inter', sans-serif"
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                                titleColor: textColor,
+                                bodyColor: textColor,
+                                borderColor: gridColor,
+                                borderWidth: 1
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Failed to load risk distribution:', error);
+            }
+        }
+
+        async function loadCampaignTrends() {
+            try {
+                const response = await fetch('/api/campaign_trends');
+                const trends = await response.json();
+
+                const ctx = document.getElementById('trendsChart').getContext('2d');
+
+                if (trendsChart) {
+                    trendsChart.destroy();
+                }
+
+                const isDark = currentTheme === 'dark';
+                const textColor = isDark ? '#f1f5f9' : '#1e293b';
+                const gridColor = isDark ? '#334155' : '#e2e8f0';
+
+                trendsChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: trends.map(t => t.campaign_name),
+                        datasets: [
+                            {
+                                label: 'Click Rate',
+                                data: trends.map(t => t.click_rate),
+                                borderColor: '#ef4444',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Submit Rate',
+                                data: trends.map(t => t.submit_rate),
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Report Rate',
+                                data: trends.map(t => t.report_rate),
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: textColor,
+                                    padding: 15,
+                                    usePointStyle: true,
+                                    font: {
+                                        size: 12,
+                                        family: "'Inter', sans-serif"
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                                titleColor: textColor,
+                                bodyColor: textColor,
+                                borderColor: gridColor,
+                                borderWidth: 1
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    color: textColor,
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                },
+                                grid: {
+                                    color: gridColor
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: textColor
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Failed to load campaign trends:', error);
+            }
+        }
+
+        // Search Functionality
+        function initializeSearch() {
+            document.getElementById('campaign-search').addEventListener('input', (e) => {
+                filterTable('campaigns-table', e.target.value);
+            });
+
+            document.getElementById('user-search').addEventListener('input', (e) => {
+                filterTable('users-table', e.target.value);
+            });
+        }
+
+        function filterTable(tableId, searchTerm) {
+            const table = document.getElementById(tableId);
+            const tbody = table.getElementsByTagName('tbody')[0];
+            const rows = tbody.getElementsByTagName('tr');
+
+            for (let row of rows) {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm.toLowerCase()) ? '' : 'none';
+            }
+        }
+
+        function viewCampaign(id) {
+            console.log('View campaign:', id);
+            showMessage(`Viewing campaign #${id}`, 'success');
+        }
+
+        function showError(message) {
+            const container = document.getElementById('error-container');
+            container.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    ${message}
+                </div>
+            `;
+
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+
+        function showMessage(message, type = 'success') {
+            const container = document.getElementById('error-container');
+            const className = type === 'success' ? 'success-message' : 'error-message';
+            const icon = type === 'success' ? 'check-circle' : 'exclamation-circle';
+
+            container.innerHTML = `
+                <div class="${className}">
+                    <i class="fas fa-${icon}"></i>
+                    ${message}
+                </div>
+            `;
+
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 3000);
+        }
+
+        // Auto-refresh every 60 seconds
+        setInterval(loadDashboard, 60000);
+    </script>
+</body>
+</html>

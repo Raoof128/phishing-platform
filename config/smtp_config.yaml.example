@@ -1,0 +1,50 @@
+# SMTP Configuration for GoPhish Email Sending - EXAMPLE
+# Copy this file to automation/config/smtp_config.yaml and configure with your settings
+
+smtp_profiles:
+  # Gmail SMTP Configuration
+  gmail:
+    host: smtp.gmail.com
+    port: 587
+    username: your-email@gmail.com
+    password: your-app-specific-password  # Generate at https://myaccount.google.com/apppasswords
+    from_address: noreply@yourdomain.com
+    from_name: IT Security Team
+    use_tls: true
+    ignore_cert_errors: false
+
+  # SendGrid SMTP Configuration
+  sendgrid:
+    host: smtp.sendgrid.net
+    port: 587
+    username: apikey
+    password: your-sendgrid-api-key
+    from_address: security@yourdomain.com
+    from_name: Security Team
+    use_tls: true
+    ignore_cert_errors: false
+
+  # Custom SMTP Server
+  custom:
+    host: mail.yourdomain.com
+    port: 587
+    username: phishing@yourdomain.com
+    password: your-password
+    from_address: security@yourdomain.com
+    from_name: Security Awareness Team
+    use_tls: true
+    ignore_cert_errors: false
+
+# Default SMTP profile to use
+default_profile: gmail
+
+# Email sending settings
+email_settings:
+  max_send_rate: 20  # emails per minute
+  retry_attempts: 3
+  retry_delay: 300  # seconds between retries
+
+# Headers to add to emails
+custom_headers:
+  X-Mailer: Microsoft Outlook
+  X-Priority: "1"

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Training - Next Steps</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 650px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px 40px;
+            text-align: center;
+        }
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+        .content {
+            padding: 40px;
+        }
+        .progress-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .progress-section h2 {
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+        .progress-bar {
+            background-color: rgba(255,255,255,0.3);
+            height: 8px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-fill {
+            background-color: white;
+            height: 100%;
+            width: 33%;
+            animation: growProgress 1s ease-out;
+        }
+        @keyframes growProgress {
+            from { width: 0%; }
+            to { width: 33%; }
+        }
+        .modules {
+            margin: 30px 0;
+        }
+        .module {
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .module:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .module-icon {
+            font-size: 40px;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+        .module-content {
+            flex-grow: 1;
+        }
+        .module-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+        }
+        .module-description {
+            font-size: 14px;
+            color: #666;
+        }
+        .module-status {
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-current {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-locked {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+        .next-steps {
+            background-color: #e7f3ff;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+        .next-steps h3 {
+            color: #0d47a1;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+        .next-steps p {
+            color: #1565c0;
+            line-height: 1.6;
+        }
+        .button-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 30px;
+        }
+        .button {
+            flex: 1;
+            padding: 14px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .button-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .button-secondary {
+            background-color: #f8f9fa;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 24px 40px;
+            text-align: center;
+            font-size: 13px;
+            color: #666;
+        }
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">🎓</div>
+            <h1>Security Training Required</h1>
+            <p class="subtitle">Complete your personalized security awareness training</p>
+        </div>
+        
+        <div class="content">
+            <div class="progress-section">
+                <h2>Your Training Progress</h2>
+                <p>You've clicked on a simulated phishing email. Complete the training modules below to improve your security awareness.</p>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <p style="font-size: 14px; opacity: 0.9;">1 of 3 modules completed</p>
+            </div>
+            
+            <div class="next-steps">
+                <h3>📋 Why This Training Matters</h3>
+                <p>Based on your interaction with the simulated phishing email, we've assigned specific training modules to help you recognize and avoid real phishing attacks. These modules are tailored to address common vulnerabilities and will take approximately 30 minutes to complete.</p>
+            </div>
+            
+            <h2 style="font-size: 22px; color: #333; margin: 30px 0 20px;">Your Training Modules</h2>
+            
+            <div class="modules">
+                <div class="module">
+                    <div class="module-icon">✅</div>
+                    <div class="module-content">
+                        <div class="module-title">Introduction to Phishing</div>
+                        <div class="module-description">Understanding what phishing is and why it's dangerous</div>
+                    </div>
+                    <div class="module-status status-current">Completed</div>
+                </div>
+                
+                <div class="module">
+                    <div class="module-icon">📖</div>
+                    <div class="module-content">
+                        <div class="module-title">Recognizing Phishing Red Flags</div>
+                        <div class="module-description">Learn to identify suspicious emails and messages</div>
+                    </div>
+                    <div class="module-status status-current">Start Now</div>
+                </div>
+                
+                <div class="module">
+                    <div class="module-icon">🛡️</div>
+                    <div class="module-content">
+                        <div class="module-title">Safe Email Practices</div>
+                        <div class="module-description">Best practices for handling emails and links safely</div>
+                    </div>
+                    <div class="module-status status-locked">Locked</div>
+                </div>
+                
+                <div class="module">
+                    <div class="module-icon">🚨</div>
+                    <div class="module-content">
+                        <div class="module-title">Incident Response</div>
+                        <div class="module-description">What to do if you suspect a phishing attack</div>
+                    </div>
+                    <div class="module-status status-locked">Locked</div>
+                </div>
+            </div>
+            
+            <div style="background-color: #fff9e6; border-left: 4px solid #ffb300; padding: 16px; border-radius: 8px; margin: 30px 0;">
+                <strong style="color: #f57c00;">⏰ Deadline:</strong>
+                <span style="color: #e65100;"> Complete all modules within 14 days (by October 27, 2025)</span>
+            </div>
+            
+            <div class="button-group">
+                <a href="#" class="button button-primary">Continue Training</a>
+                <a href="#" class="button button-secondary">View Schedule</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Need Help?</strong> Contact the training coordinator at <a href="mailto:training@company.com">training@company.com</a></p>
+            <p style="margin-top: 12px;">Questions about this exercise? Email <a href="mailto:security@company.com">security@company.com</a></p>
+            <p style="margin-top: 16px; font-size: 12px;">&copy; 2025 Security Awareness Training Program</p>
+        </div>
+    </div>
+    
+    {{.Tracker}}
+</body>
+</html>

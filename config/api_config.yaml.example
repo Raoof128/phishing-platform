@@ -1,0 +1,101 @@
+# GoPhish API Configuration - EXAMPLE
+# Copy this file to automation/config/api_config.yaml and configure with your settings
+
+# GoPhish server settings
+gophish:
+  # API endpoint (default GoPhish installation)
+  server_url: https://127.0.0.1:3333
+
+  # API key (get this from GoPhish admin dashboard under Settings -> API)
+  # IMPORTANT: Generate your API key in GoPhish and replace 'your-api-key-here'
+  api_key: your-api-key-here
+
+  # Verify SSL certificate (set to false for self-signed certs)
+  verify_ssl: false
+
+  # Request timeout in seconds
+  timeout: 30
+
+# Campaign settings
+campaign_defaults:
+  # Time zone for scheduling
+  timezone: Australia/Sydney
+
+  # Default launch time (HH:MM)
+  default_launch_time: "09:00"
+
+  # Campaign duration in days
+  duration_days: 7
+
+  # Send emails within this window (hours after launch)
+  send_window_hours: 2
+
+  # Automatically complete campaign after duration
+  auto_complete: true
+
+# Analytics settings
+analytics:
+  # Database path (relative to project root)
+  gophish_db_path: ./gophish/gophish.db
+
+  # Report output directory
+  reports_dir: ./reports
+
+  # Chart theme (plotly, seaborn, ggplot)
+  chart_theme: plotly
+
+  # Export formats
+  export_formats:
+    - html
+    - pdf
+    - csv
+
+# Training automation settings
+training:
+  # Risk score thresholds
+  risk_thresholds:
+    high: 70
+    medium: 40
+    low: 0
+
+  # Training assignment based on risk
+  training_modules:
+    high_risk:
+      - advanced_phishing_recognition
+      - social_engineering_deep_dive
+      - incident_response
+    medium_risk:
+      - intermediate_security_awareness
+      - email_safety_practices
+    low_risk:
+      - basic_email_safety
+
+  # Training completion deadline (days)
+  completion_deadline_days: 14
+
+  # Send reminder emails
+  send_reminders: true
+  reminder_interval_days: 3
+
+# User import settings
+user_import:
+  # CSV column mappings
+  csv_columns:
+    email: email
+    first_name: first_name
+    last_name: last_name
+    position: position
+    department: department
+
+  # Validate email addresses
+  validate_emails: true
+
+  # Skip invalid entries
+  skip_invalid: true
+
+# Logging settings
+logging:
+  level: INFO  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  log_file: ./logs/phishing_platform.log
+  max_log_size_mb: 50
+  backup_count: 5
