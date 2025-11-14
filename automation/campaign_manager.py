@@ -6,42 +6,28 @@ Handles campaign creation, scheduling, and management via GoPhish API
 
 import requests
 import json
-import yaml
 import logging
 from datetime import datetime, timedelta
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 import urllib3
+
+from automation.constants import (
+    DEFAULT_API_TIMEOUT,
+    CampaignStatus,
+    UserStatus
+)
+from automation.utils import (
+    load_config,
+    retry_on_failure,
+    calculate_percentage,
+    APIError
+)
 
 # Disable SSL warnings for self-signed certificates
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
 logger = logging.getLogger(__name__)
-
-
-def load_config(config_path: str) -> Dict:
-    """
-    Load configuration from YAML file
-
-    Args:
-        config_path: Path to configuration file
-
-    Returns:
-        Dictionary with configuration
-    """
-    try:
-        with open(config_path, 'r') as f:
-            return yaml.safe_load(f)
-    except FileNotFoundError:
-        logger.error(f"Configuration file not found: {config_path}")
-        raise
-    except yaml.YAMLError as e:
-        logger.error(f"Error parsing configuration file: {e}")
-        raise
 
 
 class GophishCampaign:
@@ -53,89 +39,101 @@ class GophishCampaign:
     def __init__(self, config_path: str = 'automation/config/api_config.yaml'):
         """
         Initialize GoPhish campaign manager
-        
+
         Args:
             config_path: Path to API configuration file
+
+        Raises:
+            ConfigurationError: If configuration is invalid
         """
-        self.config = self._load_config(config_path)
-        self.api_key = self.config['gophish']['api_key']
-        self.server_url = self.config['gophish']['server_url']
-        self.verify_ssl = self.config['gophish']['verify_ssl']
-        self.timeout = self.config['gophish']['timeout']
-        
-        self.headers = {
-            'Authorization': f'Bearer {self.api_key}',
-            'Content-Type': 'application/json'
-        }
-        
-        logger.info(f"Initialized GoPhish Campaign Manager for {self.server_url}")
-    
-    def _load_config(self, config_path: str) -> Dict:
-        """Load configuration from YAML file"""
         try:
-            with open(config_path, 'r') as f:
-                return yaml.safe_load(f)
-        except FileNotFoundError:
-            logger.error(f"Configuration file not found: {config_path}")
-            raise
-        except yaml.YAMLError as e:
-            logger.error(f"Error parsing configuration file: {e}")
+            self.config = load_config(config_path)
+
+            # Validate required configuration keys
+            required_keys = ['gophish']
+            gophish_config = self.config.get('gophish', {})
+            required_gophish_keys = ['api_key', 'server_url']
+
+            for key in required_gophish_keys:
+                if key not in gophish_config:
+                    raise ValueError(f"Missing required configuration: gophish.{key}")
+
+            self.api_key: str = gophish_config['api_key']
+            self.server_url: str = gophish_config['server_url'].rstrip('/')
+            self.verify_ssl: bool = gophish_config.get('verify_ssl', False)
+            self.timeout: int = gophish_config.get('timeout', DEFAULT_API_TIMEOUT)
+
+            self.headers: Dict[str, str] = {
+                'Authorization': f'Bearer {self.api_key}',
+                'Content-Type': 'application/json'
+            }
+
+            logger.info(f"Initialized GoPhish Campaign Manager for {self.server_url}")
+
+        except Exception as e:
+            logger.error(f"Failed to initialize campaign manager: {e}")
             raise
     
-    def _make_request(self, method: str, endpoint: str, data: Optional[Dict] = None) -> requests.Response:
+    @retry_on_failure(max_retries=3)
+    def _make_request(
+        self,
+        method: str,
+        endpoint: str,
+        data: Optional[Dict[str, Any]] = None
+    ) -> requests.Response:
         """
-        Make HTTP request to GoPhish API
-        
+        Make HTTP request to GoPhish API with retry logic
+
         Args:
             method: HTTP method (GET, POST, PUT, DELETE)
             endpoint: API endpoint
             data: Request payload
-            
+
         Returns:
             Response object
+
+        Raises:
+            APIError: If request fails after retries
         """
         url = f"{self.server_url}/api/{endpoint}"
-        
+
         try:
+            request_kwargs = {
+                'headers': self.headers,
+                'verify': self.verify_ssl,
+                'timeout': self.timeout
+            }
+
             if method == 'GET':
-                response = requests.get(
-                    url,
-                    headers=self.headers,
-                    verify=self.verify_ssl,
-                    timeout=self.timeout
-                )
+                response = requests.get(url, **request_kwargs)
             elif method == 'POST':
-                response = requests.post(
-                    url,
-                    headers=self.headers,
-                    json=data,
-                    verify=self.verify_ssl,
-                    timeout=self.timeout
-                )
+                response = requests.post(url, json=data, **request_kwargs)
             elif method == 'PUT':
-                response = requests.put(
-                    url,
-                    headers=self.headers,
-                    json=data,
-                    verify=self.verify_ssl,
-                    timeout=self.timeout
-                )
+                response = requests.put(url, json=data, **request_kwargs)
             elif method == 'DELETE':
-                response = requests.delete(
-                    url,
-                    headers=self.headers,
-                    verify=self.verify_ssl,
-                    timeout=self.timeout
-                )
+                response = requests.delete(url, **request_kwargs)
             else:
                 raise ValueError(f"Unsupported HTTP method: {method}")
-            
+
             response.raise_for_status()
             return response
-            
+
+        except requests.exceptions.Timeout as e:
+            error_msg = f"API request timeout: {url}"
+            logger.error(error_msg)
+            raise APIError(error_msg) from e
+        except requests.exceptions.ConnectionError as e:
+            error_msg = f"API connection error: {url}"
+            logger.error(error_msg)
+            raise APIError(error_msg) from e
+        except requests.exceptions.HTTPError as e:
+            error_msg = f"API HTTP error: {e.response.status_code} - {url}"
+            logger.error(error_msg)
+            raise APIError(error_msg) from e
         except requests.exceptions.RequestException as e:
-            logger.error(f"API request failed: {e}")
-            raise
+            error_msg = f"API request failed: {e}"
+            logger.error(error_msg)
+            raise APIError(error_msg) from e
     
     def test_connection(self) -> bool:
         """
@@ -317,19 +315,13 @@ class GophishCampaign:
             'errors': sum(1 for r in results if r['status'] == 'Error'),
         }
 
-        # Calculate rates
-        if summary['emails_sent'] > 0:
-            summary['open_rate'] = round((summary['emails_opened'] / summary['emails_sent']) * 100, 2)
-            summary['click_rate'] = round((summary['links_clicked'] / summary['emails_sent']) * 100, 2)
-            summary['submission_rate'] = round((summary['data_submitted'] / summary['emails_sent']) * 100, 2)
-            summary['submit_rate'] = summary['submission_rate']  # Add alias
-            summary['report_rate'] = round((summary['emails_reported'] / summary['emails_sent']) * 100, 2)
-        else:
-            summary['open_rate'] = 0
-            summary['click_rate'] = 0
-            summary['submission_rate'] = 0
-            summary['submit_rate'] = 0
-            summary['report_rate'] = 0
+        # Calculate rates using utility function
+        sent = summary['emails_sent']
+        summary['open_rate'] = calculate_percentage(summary['emails_opened'], sent)
+        summary['click_rate'] = calculate_percentage(summary['links_clicked'], sent)
+        summary['submission_rate'] = calculate_percentage(summary['data_submitted'], sent)
+        summary['submit_rate'] = summary['submission_rate']  # Add alias
+        summary['report_rate'] = calculate_percentage(summary['emails_reported'], sent)
 
         return summary
     

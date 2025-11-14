@@ -10,17 +10,33 @@ import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import plotly.express as px
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
-import json
-import yaml
+from typing import Dict, List, Optional, Tuple, Any
+from contextlib import contextmanager
 import logging
 from pathlib import Path
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+from automation.constants import (
+    POINTS_EMAIL_OPENED,
+    POINTS_LINK_CLICKED,
+    POINTS_DATA_SUBMITTED,
+    POINTS_EMAIL_REPORTED,
+    RISK_SCORE_MIN,
+    RISK_SCORE_MAX,
+    RISK_THRESHOLD_HIGH,
+    RISK_THRESHOLD_MEDIUM,
+    RISK_THRESHOLD_LOW,
+    RiskLevel,
+    UserStatus,
+    REPORT_MAX_RESULTS_DISPLAY,
+    REPORT_FILENAME_DATE_FORMAT
 )
+from automation.utils import (
+    load_config,
+    calculate_percentage,
+    ConfigurationError
+)
+
+# Configure logging
 logger = logging.getLogger(__name__)
 
 
@@ -33,50 +49,73 @@ class PhishingAnalytics:
     def __init__(self, config_path: str = 'automation/config/api_config.yaml'):
         """
         Initialize analytics module
-        
+
         Args:
             config_path: Path to configuration file
+
+        Raises:
+            ConfigurationError: If configuration is invalid
         """
-        self.config = self._load_config(config_path)
-        self.db_path = self.config['analytics']['gophish_db_path']
-        self.reports_dir = Path(self.config['analytics']['reports_dir'])
-        self.reports_dir.mkdir(parents=True, exist_ok=True)
-        
-        logger.info(f"Initialized PhishingAnalytics with database: {self.db_path}")
-    
-    def _load_config(self, config_path: str) -> Dict:
-        """Load configuration from YAML file"""
         try:
-            with open(config_path, 'r') as f:
-                return yaml.safe_load(f)
-        except FileNotFoundError:
-            logger.error(f"Configuration file not found: {config_path}")
+            self.config = load_config(config_path)
+
+            # Validate analytics configuration
+            if 'analytics' not in self.config:
+                raise ConfigurationError("Missing 'analytics' section in configuration")
+
+            analytics_config = self.config['analytics']
+            required_keys = ['gophish_db_path', 'reports_dir']
+
+            for key in required_keys:
+                if key not in analytics_config:
+                    raise ConfigurationError(f"Missing required configuration: analytics.{key}")
+
+            self.db_path: str = analytics_config['gophish_db_path']
+            self.reports_dir: Path = Path(analytics_config['reports_dir'])
+            self.reports_dir.mkdir(parents=True, exist_ok=True)
+
+            logger.info(f"Initialized PhishingAnalytics with database: {self.db_path}")
+
+        except Exception as e:
+            logger.error(f"Failed to initialize analytics: {e}")
             raise
-    
-    def _connect_db(self) -> sqlite3.Connection:
-        """Connect to GoPhish database"""
+
+    @contextmanager
+    def _get_db_connection(self):
+        """
+        Context manager for database connections
+
+        Yields:
+            sqlite3.Connection: Database connection
+
+        Raises:
+            sqlite3.Error: If connection fails
+        """
+        conn = None
         try:
             conn = sqlite3.connect(self.db_path)
             conn.row_factory = sqlite3.Row
-            return conn
+            yield conn
         except sqlite3.Error as e:
-            logger.error(f"Database connection failed: {e}")
+            logger.error(f"Database error: {e}")
             raise
+        finally:
+            if conn:
+                conn.close()
     
-    def get_campaign_results(self, campaign_id: int) -> Dict:
+    def get_campaign_results(self, campaign_id: int) -> Dict[str, Any]:
         """
         Get detailed campaign results
-        
+
         Args:
             campaign_id: Campaign ID
-            
+
         Returns:
             Dictionary with campaign metrics
         """
-        conn = self._connect_db()
-        cursor = conn.cursor()
-        
-        try:
+        with self._get_db_connection() as conn:
+            cursor = conn.cursor()
+
             # Get campaign info
             cursor.execute("""
                 SELECT id, name, created_date, launch_date, completed_date, status
@@ -84,11 +123,11 @@ class PhishingAnalytics:
                 WHERE id = ?
             """, (campaign_id,))
             campaign = cursor.fetchone()
-            
+
             if not campaign:
                 logger.warning(f"Campaign {campaign_id} not found")
                 return {}
-            
+
             # Get results
             cursor.execute("""
                 SELECT email, first_name, last_name, position, status, ip, latitude, longitude
@@ -96,7 +135,7 @@ class PhishingAnalytics:
                 WHERE campaign_id = ?
             """, (campaign_id,))
             results = cursor.fetchall()
-            
+
             # Get timeline events
             cursor.execute("""
                 SELECT email, time, message, details
@@ -105,7 +144,7 @@ class PhishingAnalytics:
                 ORDER BY time
             """, (campaign_id,))
             events = cursor.fetchall()
-            
+
             # Calculate metrics
             total = len(results)
             sent = sum(1 for r in results if r['status'] not in ['Error', 'Scheduled'])
@@ -113,7 +152,7 @@ class PhishingAnalytics:
             clicked = sum(1 for r in results if r['status'] in ['Clicked Link', 'Submitted Data'])
             submitted = sum(1 for r in results if r['status'] == 'Submitted Data')
             reported = sum(1 for r in results if r['status'] == 'Email Reported')
-            
+
             metrics = {
                 'campaign_id': campaign['id'],
                 'name': campaign['name'],
@@ -127,18 +166,15 @@ class PhishingAnalytics:
                 'links_clicked': clicked,
                 'data_submitted': submitted,
                 'emails_reported': reported,
-                'open_rate': (opened / sent * 100) if sent > 0 else 0,
-                'click_rate': (clicked / sent * 100) if sent > 0 else 0,
-                'submission_rate': (submitted / sent * 100) if sent > 0 else 0,
-                'report_rate': (reported / sent * 100) if sent > 0 else 0,
+                'open_rate': calculate_percentage(opened, sent),
+                'click_rate': calculate_percentage(clicked, sent),
+                'submission_rate': calculate_percentage(submitted, sent),
+                'report_rate': calculate_percentage(reported, sent),
                 'results': [dict(r) for r in results],
                 'events': [dict(e) for e in events]
             }
-            
+
             return metrics
-            
-        finally:
-            conn.close()
     
     def calculate_risk_score(self, email: str) -> Tuple[int, Dict]:
         """
@@ -153,9 +189,10 @@ class PhishingAnalytics:
         result = self.calculate_user_risk_score(email)
         return result['risk_score'], result
 
-    def calculate_user_risk_score(self, email: str) -> Dict:
+    def calculate_user_risk_score(self, email: str) -> Dict[str, Any]:
         """
         Calculate risk score for a user based on historical behavior
+        Uses configurable constants for scoring weights
 
         Args:
             email: User email address
@@ -163,10 +200,9 @@ class PhishingAnalytics:
         Returns:
             Dictionary with risk score and details
         """
-        conn = self._connect_db()
-        cursor = conn.cursor()
-        
-        try:
+        with self._get_db_connection() as conn:
+            cursor = conn.cursor()
+
             # Get user's campaign history
             cursor.execute("""
                 SELECT c.id, c.name, r.status
@@ -175,52 +211,52 @@ class PhishingAnalytics:
                 WHERE r.email = ?
             """, (email,))
             history = cursor.fetchall()
-            
+
             if not history:
                 return {
                     'email': email,
                     'risk_score': 0,
-                    'risk_level': 'Unknown',
+                    'risk_level': RiskLevel.UNKNOWN.value,
                     'campaigns_participated': 0,
                     'details': 'No campaign history'
                 }
-            
+
             # Calculate risk factors
             total_campaigns = len(history)
             opened_count = sum(1 for h in history if h['status'] in ['Email Opened', 'Clicked Link', 'Submitted Data'])
             clicked_count = sum(1 for h in history if h['status'] in ['Clicked Link', 'Submitted Data'])
             submitted_count = sum(1 for h in history if h['status'] == 'Submitted Data')
             reported_count = sum(1 for h in history if h['status'] == 'Email Reported')
-            
-            # Risk scoring algorithm
+
+            # Risk scoring algorithm using constants
             # Higher score = higher risk
             risk_score = 0
-            
-            # Email opened (10 points each)
-            risk_score += opened_count * 10
-            
-            # Link clicked (25 points each)
-            risk_score += clicked_count * 25
-            
-            # Data submitted (40 points each)
-            risk_score += submitted_count * 40
-            
-            # Email reported (-15 points each, reduces risk)
-            risk_score -= reported_count * 15
-            
-            # Cap risk score at 0-100
-            risk_score = max(0, min(100, risk_score))
-            
-            # Determine risk level
-            if risk_score >= 70:
-                risk_level = 'High'
-            elif risk_score >= 40:
-                risk_level = 'Medium'
-            elif risk_score > 0:
-                risk_level = 'Low'
+
+            # Email opened
+            risk_score += opened_count * POINTS_EMAIL_OPENED
+
+            # Link clicked
+            risk_score += clicked_count * POINTS_LINK_CLICKED
+
+            # Data submitted
+            risk_score += submitted_count * POINTS_DATA_SUBMITTED
+
+            # Email reported (reduces risk)
+            risk_score += reported_count * POINTS_EMAIL_REPORTED
+
+            # Cap risk score at configured min/max
+            risk_score = max(RISK_SCORE_MIN, min(RISK_SCORE_MAX, risk_score))
+
+            # Determine risk level using thresholds
+            if risk_score >= RISK_THRESHOLD_HIGH:
+                risk_level = RiskLevel.HIGH.value
+            elif risk_score >= RISK_THRESHOLD_MEDIUM:
+                risk_level = RiskLevel.MEDIUM.value
+            elif risk_score >= RISK_THRESHOLD_LOW:
+                risk_level = RiskLevel.LOW.value
             else:
-                risk_level = 'Minimal'
-            
+                risk_level = RiskLevel.MINIMAL.value
+
             return {
                 'email': email,
                 'risk_score': risk_score,
@@ -232,9 +268,6 @@ class PhishingAnalytics:
                 'emails_reported': reported_count,
                 'details': f'Participated in {total_campaigns} campaigns'
             }
-            
-        finally:
-            conn.close()
     
     def get_all_user_risks(self) -> pd.DataFrame:
         """
@@ -252,27 +285,25 @@ class PhishingAnalytics:
         Returns:
             DataFrame with user risk scores
         """
-        conn = self._connect_db()
-        cursor = conn.cursor()
-        
-        try:
+        with self._get_db_connection() as conn:
+            cursor = conn.cursor()
+
             # Get all unique users
             cursor.execute("SELECT DISTINCT email FROM results")
             users = [row['email'] for row in cursor.fetchall()]
-            
-            # Calculate risk for each user
-            risk_data = []
-            for email in users:
-                risk_info = self.calculate_user_risk_score(email)
-                risk_data.append(risk_info)
-            
-            df = pd.DataFrame(risk_data)
-            df = df.sort_values('risk_score', ascending=False)
-            
-            return df
-            
-        finally:
-            conn.close()
+
+        # Calculate risk for each user
+        # Note: This creates new connections for each user, which is fine
+        # as calculate_user_risk_score manages its own connections
+        risk_data = []
+        for email in users:
+            risk_info = self.calculate_user_risk_score(email)
+            risk_data.append(risk_info)
+
+        df = pd.DataFrame(risk_data)
+        df = df.sort_values('risk_score', ascending=False)
+
+        return df
     
     def generate_campaign_report(self, campaign_id: int, output_format: str = 'html') -> str:
         """
@@ -378,7 +409,7 @@ class PhishingAnalytics:
                     </tr>
         """
         
-        for result in metrics['results'][:50]:  # Limit to 50 results
+        for result in metrics['results'][:REPORT_MAX_RESULTS_DISPLAY]:
             html_content += f"""
                     <tr>
                         <td>{result['email']}</td>

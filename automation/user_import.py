@@ -5,22 +5,27 @@ Handles CSV import and GoPhish group management
 """
 
 import csv
-import yaml
 import logging
 import requests
-import re
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 from pathlib import Path
 import urllib3
+
+from automation.constants import DEFAULT_API_TIMEOUT
+from automation.utils import (
+    load_config,
+    validate_email,
+    sanitize_string,
+    retry_on_failure,
+    ConfigurationError,
+    ValidationError,
+    APIError
+)
 
 # Disable SSL warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
 logger = logging.getLogger(__name__)
 
 
@@ -32,44 +37,39 @@ class UserImporter:
     def __init__(self, config_path: str = 'automation/config/api_config.yaml'):
         """
         Initialize user importer
-        
+
         Args:
             config_path: Path to configuration file
+
+        Raises:
+            ConfigurationError: If configuration is invalid
         """
-        self.config = self._load_config(config_path)
-        self.api_key = self.config['gophish']['api_key']
-        self.server_url = self.config['gophish']['server_url']
-        self.verify_ssl = self.config['gophish']['verify_ssl']
-        self.import_config = self.config['user_import']
-        
-        self.headers = {
-            'Authorization': f'Bearer {self.api_key}',
-            'Content-Type': 'application/json'
-        }
-        
-        logger.info("Initialized UserImporter")
-    
-    def _load_config(self, config_path: str) -> Dict:
-        """Load configuration from YAML file"""
         try:
-            with open(config_path, 'r') as f:
-                return yaml.safe_load(f)
-        except FileNotFoundError:
-            logger.error(f"Configuration file not found: {config_path}")
+            self.config = load_config(config_path)
+
+            # Validate required configuration
+            if 'gophish' not in self.config:
+                raise ConfigurationError("Missing 'gophish' section in configuration")
+            if 'user_import' not in self.config:
+                raise ConfigurationError("Missing 'user_import' section in configuration")
+
+            gophish_config = self.config['gophish']
+            self.api_key: str = gophish_config['api_key']
+            self.server_url: str = gophish_config['server_url'].rstrip('/')
+            self.verify_ssl: bool = gophish_config.get('verify_ssl', False)
+            self.timeout: int = gophish_config.get('timeout', DEFAULT_API_TIMEOUT)
+            self.import_config: Dict[str, Any] = self.config['user_import']
+
+            self.headers: Dict[str, str] = {
+                'Authorization': f'Bearer {self.api_key}',
+                'Content-Type': 'application/json'
+            }
+
+            logger.info("Initialized UserImporter")
+
+        except Exception as e:
+            logger.error(f"Failed to initialize user importer: {e}")
             raise
-    
-    def validate_email(self, email: str) -> bool:
-        """
-        Validate email address format
-        
-        Args:
-            email: Email address to validate
-            
-        Returns:
-            True if valid email format
-        """
-        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        return re.match(pattern, email) is not None
     
     def import_users_from_csv(self, csv_file: str) -> List[Dict]:
         """
@@ -92,26 +92,26 @@ class UserImporter:
                 
                 for row_num, row in enumerate(reader, start=2):
                     try:
-                        # Extract user data using column mapping
+                        # Extract and sanitize user data using column mapping
                         user = {
-                            'email': row.get(column_mapping['email'], '').strip(),
-                            'first_name': row.get(column_mapping['first_name'], '').strip(),
-                            'last_name': row.get(column_mapping['last_name'], '').strip(),
-                            'position': row.get(column_mapping['position'], '').strip()
+                            'email': sanitize_string(row.get(column_mapping['email'], '')),
+                            'first_name': sanitize_string(row.get(column_mapping['first_name'], '')),
+                            'last_name': sanitize_string(row.get(column_mapping['last_name'], '')),
+                            'position': sanitize_string(row.get(column_mapping['position'], ''))
                         }
-                        
+
                         # Validate email if required
-                        if validate_emails and not self.validate_email(user['email']):
+                        if validate_emails and not validate_email(user['email']):
                             logger.warning(f"Invalid email at row {row_num}: {user['email']}")
                             if skip_invalid:
                                 continue
-                        
+
                         # Check required fields
                         if not user['email']:
                             logger.warning(f"Missing email at row {row_num}")
                             if skip_invalid:
                                 continue
-                        
+
                         users.append(user)
                         
                     except Exception as e:

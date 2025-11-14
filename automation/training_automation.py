@@ -5,21 +5,23 @@ Assigns and tracks security training based on campaign performance
 """
 
 import smtplib
-import yaml
 import logging
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import Dict, List, Any, Optional
 from pathlib import Path
 
 from automation.analytics import PhishingAnalytics
+from automation.constants import (
+    RISK_THRESHOLD_HIGH,
+    RISK_THRESHOLD_MEDIUM,
+    TRAINING_DEADLINE_DAYS,
+    RiskLevel
+)
+from automation.utils import load_config, ConfigurationError
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
 logger = logging.getLogger(__name__)
 
 
@@ -31,23 +33,26 @@ class TrainingAutomation:
     def __init__(self, config_path: str = 'automation/config/api_config.yaml'):
         """
         Initialize training automation
-        
+
         Args:
             config_path: Path to configuration file
+
+        Raises:
+            ConfigurationError: If configuration is invalid
         """
-        self.config = self._load_config(config_path)
-        self.analytics = PhishingAnalytics(config_path)
-        self.training_config = self.config['training']
-        
-        logger.info("Initialized TrainingAutomation")
-    
-    def _load_config(self, config_path: str) -> Dict:
-        """Load configuration from YAML file"""
         try:
-            with open(config_path, 'r') as f:
-                return yaml.safe_load(f)
-        except FileNotFoundError:
-            logger.error(f"Configuration file not found: {config_path}")
+            self.config = load_config(config_path)
+
+            if 'training' not in self.config:
+                raise ConfigurationError("Missing 'training' section in configuration")
+
+            self.analytics = PhishingAnalytics(config_path)
+            self.training_config = self.config['training']
+
+            logger.info("Initialized TrainingAutomation")
+
+        except Exception as e:
+            logger.error(f"Failed to initialize training automation: {e}")
             raise
     
     def assign_training_based_on_risk(self, email: str) -> List[str]:
