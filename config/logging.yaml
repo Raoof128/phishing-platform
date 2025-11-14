@@ -1,0 +1,205 @@
+# Logging Configuration for Phishing Awareness Training Platform
+# Based on Python logging module
+
+version: 1
+disable_existing_loggers: false
+
+# Formatters define the format of log messages
+formatters:
+  # Simple format for console output
+  simple:
+    format: '%(levelname)s - %(message)s'
+
+  # Detailed format for file logging
+  detailed:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+
+  # JSON format for structured logging (parsing by log aggregators)
+  json:
+    (): pythonjsonlogger.jsonlogger.JsonFormatter
+    format: '%(asctime)s %(name)s %(levelname)s %(funcName)s %(lineno)d %(message)s'
+
+  # Production format with request context
+  production:
+    format: '[%(asctime)s] %(levelname)s in %(module)s [%(pathname)s:%(lineno)d]: %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+
+# Handlers define where logs are sent
+handlers:
+  # Console handler for development
+  console:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: simple
+    stream: ext://sys.stdout
+
+  # File handler for general application logs
+  file:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: detailed
+    filename: logs/app.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 10
+    encoding: utf8
+
+  # File handler for error logs only
+  error_file:
+    class: logging.handlers.RotatingFileHandler
+    level: ERROR
+    formatter: detailed
+    filename: logs/error.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 10
+    encoding: utf8
+
+  # File handler for security events
+  security_file:
+    class: logging.handlers.RotatingFileHandler
+    level: WARNING
+    formatter: production
+    filename: logs/security.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 20
+    encoding: utf8
+
+  # File handler for API requests
+  api_file:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: json
+    filename: logs/api.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 10
+    encoding: utf8
+
+  # Timed rotating handler for audit logs (daily rotation)
+  audit_file:
+    class: logging.handlers.TimedRotatingFileHandler
+    level: INFO
+    formatter: production
+    filename: logs/audit.log
+    when: midnight
+    interval: 1
+    backupCount: 90  # Keep 90 days of audit logs
+    encoding: utf8
+
+  # Syslog handler for production environments
+  syslog:
+    class: logging.handlers.SysLogHandler
+    level: WARNING
+    formatter: production
+    address: /dev/log  # Unix socket, change for Windows
+
+# Loggers define logging configuration for specific modules
+loggers:
+  # Dashboard application logger
+  dashboard:
+    level: INFO
+    handlers: [console, file, error_file, api_file]
+    propagate: false
+
+  # Campaign manager logger
+  automation.campaign_manager:
+    level: INFO
+    handlers: [console, file, error_file]
+    propagate: false
+
+  # Analytics logger
+  automation.analytics:
+    level: INFO
+    handlers: [console, file, error_file]
+    propagate: false
+
+  # Training automation logger
+  automation.training_automation:
+    level: INFO
+    handlers: [console, file, error_file]
+    propagate: false
+
+  # User import logger
+  automation.user_import:
+    level: INFO
+    handlers: [console, file, error_file]
+    propagate: false
+
+  # Validation logger (security-focused)
+  automation.validation:
+    level: WARNING
+    handlers: [console, security_file, error_file]
+    propagate: false
+
+  # Flask application logger
+  flask.app:
+    level: INFO
+    handlers: [console, api_file]
+    propagate: false
+
+  # Werkzeug (Flask development server) logger
+  werkzeug:
+    level: WARNING
+    handlers: [console, api_file]
+    propagate: false
+
+  # SQLAlchemy logger (if using ORM)
+  sqlalchemy:
+    level: WARNING
+    handlers: [console, file]
+    propagate: false
+
+  # Security events logger
+  security:
+    level: WARNING
+    handlers: [security_file, error_file, console]
+    propagate: false
+
+  # Audit events logger (compliance and tracking)
+  audit:
+    level: INFO
+    handlers: [audit_file]
+    propagate: false
+
+# Root logger configuration (catches all unconfigured loggers)
+root:
+  level: INFO
+  handlers: [console, file, error_file]
+
+# Environment-specific overrides
+# Development: More verbose logging
+development:
+  root:
+    level: DEBUG
+    handlers: [console, file]
+  loggers:
+    dashboard:
+      level: DEBUG
+    automation.campaign_manager:
+      level: DEBUG
+    automation.analytics:
+      level: DEBUG
+
+# Production: Less verbose, structured logging
+production:
+  root:
+    level: WARNING
+    handlers: [file, error_file, syslog]
+  loggers:
+    dashboard:
+      level: INFO
+      handlers: [file, error_file, api_file, syslog]
+    automation.campaign_manager:
+      level: INFO
+    automation.analytics:
+      level: INFO
+  formatters:
+    default: json
+
+# Testing: Minimal logging
+testing:
+  root:
+    level: CRITICAL
+    handlers: [console]
+  loggers:
+    dashboard:
+      level: CRITICAL

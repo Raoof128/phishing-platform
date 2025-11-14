@@ -6,6 +6,7 @@ Assigns and tracks security training based on campaign performance
 
 import smtplib
 import logging
+import yaml
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta

@@ -25,6 +25,11 @@ from automation.constants import (
     RATE_LIMIT_REQUESTS_PER_MINUTE,
     RATE_LIMIT_REQUESTS_PER_HOUR
 )
+from automation.validation import (
+    validate_path_param,
+    validate_request_args,
+    sanitize_string
+)
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
@@ -43,6 +48,20 @@ app = Flask(__name__)
 # Security configurations
 app.config['JSON_SORT_KEYS'] = False
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max request size
+
+# Security headers middleware
+@app.after_request
+def add_security_headers(response):
+    """Add security headers to all responses"""
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.plot.ly https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data:; font-src 'self' https://cdnjs.cloudflare.com;"
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
+    return response
 
 # CORS with restricted origins (configure based on your needs)
 CORS(app, resources={
@@ -184,6 +203,7 @@ def get_campaigns():
 @app.route('/api/campaign/<int:campaign_id>')
 @handle_api_errors
 @require_initialized_services
+@validate_path_param('campaign_id', 'integer', min_val=1)
 def get_campaign(campaign_id: int):
     """Get specific campaign details"""
     campaign = campaign_api.get_campaign(campaign_id)
@@ -193,6 +213,7 @@ def get_campaign(campaign_id: int):
 @app.route('/api/campaign/<int:campaign_id>/stats')
 @handle_api_errors
 @require_initialized_services
+@validate_path_param('campaign_id', 'integer', min_val=1)
 def get_campaign_stats(campaign_id: int):
     """Get campaign statistics"""
     metrics = campaign_api.get_campaign_results(campaign_id)
@@ -202,6 +223,7 @@ def get_campaign_stats(campaign_id: int):
 @app.route('/api/campaign/<int:campaign_id>/chart')
 @handle_api_errors
 @require_initialized_services
+@validate_path_param('campaign_id', 'integer', min_val=1)
 def get_campaign_chart(campaign_id: int):
     """Get campaign results as chart data"""
     metrics = campaign_api.get_campaign_results(campaign_id)
@@ -244,8 +266,11 @@ def get_user_risks():
 @app.route('/api/user_risk/<email>')
 @handle_api_errors
 @require_initialized_services
+@validate_path_param('email', 'email')
 def get_user_risk(email: str):
     """Get risk score for specific user"""
+    # Sanitize email to prevent injection
+    email = sanitize_string(email, max_length=255)
     score, details = analytics.calculate_risk_score(email)
     return jsonify(details)
 
